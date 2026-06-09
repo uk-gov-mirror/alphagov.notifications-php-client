@@ -1,3 +1,9 @@
+## [7.1.0] - 2026-06-03
+
+### Added
+
+* Added optional `sanitiseContentFor` parameter to `sendEmail` to request Markdown sanitisation for selected personalisation placeholders (`sanitise_content_for` in the API request). The send-email response may include `sanitised_content`: a map of placeholder names to `unsanitised` and `sanitised` values when content was changed. The parameter is typed as `?array` (array of placeholder names, or `null` to omit the field from the request); passing a non-array raises a PHP `TypeError` before the HTTP request is sent.
+
 ## [7.0.0] - 2026-02-18
 
 * Bumped firebase/php-jwt from ^6.1.0 to ^7.0.0 to bring in security patches

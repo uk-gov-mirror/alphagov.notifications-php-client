@@ -714,6 +714,141 @@ class ClientSpec extends ObjectBehavior
 
     }
 
+    function it_generates_the_expected_request_when_sending_email_with_sanitise_content_for(){
+
+        $payload = [
+            'email_address' => 'text@example.com',
+            'template_id'=> 118,
+            'personalisation' => [
+                'name'=>'Fred'
+            ],
+            'reference'=>'client-ref',
+            'sanitise_content_for' => ['name'],
+        ];
+
+        $this->httpClient->sendRequest( Argument::type('Psr\Http\Message\RequestInterface') )->willReturn(
+            new Response(
+                201,
+                [ 'Content-type'  => 'application/json' ],
+                json_encode([ 'notification_id' => 'xxx' ])
+            )
+        );
+
+        $this->sendEmail(
+            $payload['email_address'],
+            $payload['template_id'],
+            $payload['personalisation'],
+            $payload['reference'],
+            NULL,
+            NULL,
+            $payload['sanitise_content_for']
+        );
+
+        $this->httpClient->sendRequest( Argument::that(function( $v ) use ($payload) {
+
+            if( !( $v instanceof RequestInterface ) ){
+                return false;
+            }
+
+            if( json_decode( $v->getBody(), true ) != $payload ){
+                return false;
+            }
+
+            return true;
+
+        }))->shouldHaveBeenCalled();
+
+    }
+
+    function it_generates_the_expected_request_when_sending_email_with_empty_sanitise_content_for(){
+
+        $payload = [
+            'email_address' => 'text@example.com',
+            'template_id'=> 118,
+            'personalisation' => [
+                'name'=>'Fred'
+            ],
+            'reference'=>'client-ref',
+            'sanitise_content_for' => [],
+        ];
+
+        $this->httpClient->sendRequest( Argument::type('Psr\Http\Message\RequestInterface') )->willReturn(
+            new Response(
+                201,
+                [ 'Content-type'  => 'application/json' ],
+                json_encode([ 'notification_id' => 'xxx' ])
+            )
+        );
+
+        $this->sendEmail(
+            $payload['email_address'],
+            $payload['template_id'],
+            $payload['personalisation'],
+            $payload['reference'],
+            NULL,
+            NULL,
+            $payload['sanitise_content_for']
+        );
+
+        $this->httpClient->sendRequest( Argument::that(function( $v ) use ($payload) {
+
+            if( !( $v instanceof RequestInterface ) ){
+                return false;
+            }
+
+            if( json_decode( $v->getBody(), true ) != $payload ){
+                return false;
+            }
+
+            return true;
+
+        }))->shouldHaveBeenCalled();
+
+    }
+
+    function it_receives_the_expected_response_when_sending_email_with_sanitised_content(){
+        $id = self::SAMPLE_ID;
+        $sanitisedContent = [
+            'name' => [
+                'unsanitised' => 'Fred [click](https://evil.link)',
+                'sanitised' => 'Fred \\[click\\]\\(\\)',
+            ],
+        ];
+
+        $this->httpClient->sendRequest( Argument::type('Psr\Http\Message\RequestInterface') )->willReturn(
+            new Response(
+                201,
+                ['Content-type'  => 'application/json'],
+                json_encode([
+                    'id' => $id,
+                    'sanitised_content' => $sanitisedContent,
+                ])
+            )
+        );
+
+        $response = $this->sendEmail( 'text@example.com', 118, [ 'name'=>'Fred [click](https://evil.link)' ], '', NULL, NULL, ['name'] );
+
+        $response->shouldHaveKeyWithValue('id', $id);
+        $response->shouldHaveKeyWithValue('sanitised_content', $sanitisedContent);
+
+    }
+
+    function it_receives_the_expected_response_when_sending_email_with_empty_sanitised_content(){
+
+        $this->httpClient->sendRequest( Argument::type('Psr\Http\Message\RequestInterface') )->willReturn(
+            new Response(
+                201,
+                ['Content-type'  => 'application/json'],
+                json_encode([ 'sanitised_content' => [] ])
+            )
+        );
+
+        $response = $this->sendEmail( 'text@example.com', 118, [ 'name'=>'Fred' ] );
+
+        $response->shouldHaveKeyWithValue( 'sanitised_content', [] );
+
+    }
+
     function it_receives_the_expected_response_when_sending_email(){
         //---------------------------------
         // Test Setup
