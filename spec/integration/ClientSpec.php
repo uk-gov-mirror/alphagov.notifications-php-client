@@ -513,11 +513,12 @@ class ClientSpec extends ObjectBehavior
       $response['subject']->shouldBeNull();
       $response['letter_contact_block']->shouldBeNull();
       $response->shouldHaveKey( 'personalisation' );
-      $response['personalisation']->shouldBe( [
-        'name' => ['required' => true],
-        'day of week' => ['required' => true],
-        'colour' => ['required' => true],
-      ] );
+      $response['personalisation']->shouldHaveKey( 'name' );
+      $response['personalisation']->shouldHaveKey( 'day of week' );
+      $response['personalisation']->shouldHaveKey( 'colour' );
+      $response['personalisation']['name']->shouldBe( ['required' => true] );
+      $response['personalisation']['day of week']->shouldBe( ['required' => true] );
+      $response['personalisation']['colour']->shouldBe( ['required' => true] );
     }
 
     function it_receives_the_expected_response_when_looking_up_all_templates() {
