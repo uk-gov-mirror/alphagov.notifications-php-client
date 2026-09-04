@@ -410,6 +410,8 @@ class ClientSpec extends ObjectBehavior
       $response['subject']->shouldBeString();
       $response['subject']->shouldBe( 'Functional Tests are good' );
       $response['letter_contact_block']->shouldBeNull();
+      $response->shouldHaveKey( 'personalisation' );
+      $response['personalisation']->shouldBe( ['name' => ['required' => true]] );
     }
 
     function it_receives_the_expected_response_when_looking_up_an_sms_template() {
@@ -440,6 +442,8 @@ class ClientSpec extends ObjectBehavior
       $response['body']->shouldBe( "Hello ((name))\r\n\r\nFunctional Tests make our world a better place" );
       $response['subject']->shouldBeNull();
       $response['letter_contact_block']->shouldBeNull();
+      $response->shouldHaveKey( 'personalisation' );
+      $response['personalisation']->shouldBe( ['name' => ['required' => true]] );
     }
 
     function it_receives_the_expected_response_when_looking_up_a_letter_template() {
@@ -472,6 +476,8 @@ class ClientSpec extends ObjectBehavior
       $response['subject']->shouldBe( 'Main heading' );
       $response['letter_contact_block']->shouldBe( "Government Digital Service\n" .
       "The White Chapel Building\n10 Whitechapel High Street\nLondon\nE1 8QS\nUnited Kingdom" );
+      $response->shouldHaveKey( 'personalisation' );
+      $response['personalisation']->shouldBe( ['address_line_1' => ['required' => true]] );
     }
 
     function it_receives_the_expected_response_when_looking_up_a_template_version() {
@@ -506,6 +512,12 @@ class ClientSpec extends ObjectBehavior
       $response['body']->shouldBe("Hey ((name)), I’m trying out Notify. Today is ((day of week)) and my favourite colour is ((colour)).");
       $response['subject']->shouldBeNull();
       $response['letter_contact_block']->shouldBeNull();
+      $response->shouldHaveKey( 'personalisation' );
+      $response['personalisation']->shouldBe( [
+        'name' => ['required' => true],
+        'day of week' => ['required' => true],
+        'colour' => ['required' => true],
+      ] );
     }
 
     function it_receives_the_expected_response_when_looking_up_all_templates() {
@@ -534,6 +546,8 @@ class ClientSpec extends ObjectBehavior
           $template->shouldHaveKey( 'body' );
           $template->shouldHaveKey( 'subject' );
           $template->shouldHaveKey( 'letter_contact_block' );
+          $template->shouldHaveKey( 'personalisation' );
+          $template['personalisation']->shouldBeArray();
 
           $template['id']->shouldBeString();
           $template['created_at']->shouldBeString();
