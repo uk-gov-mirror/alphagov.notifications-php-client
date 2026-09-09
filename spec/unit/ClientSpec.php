@@ -1019,6 +1019,36 @@ class ClientSpec extends ObjectBehavior
 
     }
 
+    function it_returns_personalisation_when_looking_up_a_template(){
+
+        //---------------------------------
+        // Test Setup
+
+        $id = self::SAMPLE_ID;
+
+        $this->httpClient->sendRequest( Argument::type('Psr\Http\Message\RequestInterface') )->willReturn(
+            new Response(
+                200,
+                ['Content-type'  => 'application/json'],
+                json_encode([
+                    'id' => $id,
+                    'personalisation' => ['name' => ['required' => true]],
+                ])
+            )
+        );
+
+        //---------------------------------
+        // Perform action
+
+        $response = $this->getTemplate( $id );
+
+        //---------------------------------
+        // Check result
+
+        $response['personalisation']->shouldBe( ['name' => ['required' => true]] );
+
+    }
+
     function it_generates_the_expected_request_when_looking_up_a_template_by_version(){
 
         //---------------------------------
